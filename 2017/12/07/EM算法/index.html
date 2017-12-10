@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="统计学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="AbstractEM算法是用于含隐变量的概率模型参数的极大似然估计。EM算法是一种迭代算法，每次迭代由两个步骤组成：E步，求期望（expectation）；M步，求极大（maximization）。要想理解EM算法，首先要知道什么叫【最大似然估计】，本篇博文会一步步介绍EM算法的全貌。 EM算法的引入概率模型有时既含有观测变量（observable variable），又含有隐变量或潜在变量（la">
+<meta name="keywords" content="统计学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="EM算法">
+<meta property="og:url" content="http://yoursite.com/2017/12/07/EM算法/index.html">
+<meta property="og:site_name" content="Time waits for no one">
+<meta property="og:description" content="AbstractEM算法是用于含隐变量的概率模型参数的极大似然估计。EM算法是一种迭代算法，每次迭代由两个步骤组成：E步，求期望（expectation）；M步，求极大（maximization）。要想理解EM算法，首先要知道什么叫【最大似然估计】，本篇博文会一步步介绍EM算法的全貌。 EM算法的引入概率模型有时既含有观测变量（observable variable），又含有隐变量或潜在变量（la">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/images/171208em.png">
+<meta property="og:updated_time" content="2017-12-10T11:13:22.895Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="EM算法">
+<meta name="twitter:description" content="AbstractEM算法是用于含隐变量的概率模型参数的极大似然估计。EM算法是一种迭代算法，每次迭代由两个步骤组成：E步，求期望（expectation）；M步，求极大（maximization）。要想理解EM算法，首先要知道什么叫【最大似然估计】，本篇博文会一步步介绍EM算法的全貌。 EM算法的引入概率模型有时既含有观测变量（observable variable），又含有隐变量或潜在变量（la">
+<meta name="twitter:image" content="http://yoursite.com/images/171208em.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/07/EM算法/"/>
+
+
+
+
+
+  <title>EM算法 | Time waits for no one</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Time waits for no one</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/07/EM算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Moses">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Time waits for no one">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">EM算法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-07T16:09:03+08:00">
+                2017-12-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/机器学习/" itemprop="url" rel="index">
+                    <span itemprop="name">机器学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h3><p>EM算法是用于含隐变量的概率模型参数的极大似然估计。EM算法是一种迭代算法，每次迭代由两个步骤组成：E步，求期望（expectation）；M步，求极大（maximization）。<br>要想理解EM算法，首先要知道什么叫【最大似然估计】，本篇博文会一步步介绍EM算法的全貌。</p>
+<h3 id="EM算法的引入"><a href="#EM算法的引入" class="headerlink" title="EM算法的引入"></a>EM算法的引入</h3><p>概率模型有时既含有观测变量（observable variable），又含有隐变量或潜在变量（latent variable）.如果概率模型的变量都是观测变量，那么给定数据，就可以直接用<strong>极大似然估计法</strong>，或<strong>贝叶斯估计法</strong>估计模型参数。但是，当模型含有隐变量时，就不能简单地使用这些估计方法。</p>
+<h3 id="EM算法的例子"><a href="#EM算法的例子" class="headerlink" title="EM算法的例子"></a>EM算法的例子</h3><p><strong>例（三硬币模型）</strong> 假设有3枚硬币，分别记作 $A$、$B$、$C$。这些硬币正面朝上的概率分别是 $\pi$、$p$、$q$。进行如下硬币试验：先抛掷硬币 $A$，根据其结果选出硬币$B$或硬币$C$。<br>即如果$A$为正面，就选硬币$B$,反面则选硬币$C$；<br>然后将选出的硬币抛掷，如果为正面则记为$H$，如果为反面则记为$T$；独立的重复$n$次试验（这里$n = 10$），观测结果如下：<br>$$<br>H,H,T,H,T,T,H,T,H,H<br>$$<br>假设只能观测到抛硬币的结果，不能观测抛硬币的过程，问如何估计三硬币正面朝上的概率，即三枚硬币的参数 $(\pi\ p\ q)$。<br><strong>解</strong> 三枚硬币模型可以写作<br>$$<br>P(y|\theta) = \sum_z{P(y,z|\theta)} = \sum_z{P(y|z,\theta)P(z|\theta)}\\<br>=\pi p^y(1-p)^{1-y}+(1-\pi)q^y(1-q)^{1-y}<br>$$<br>三硬币模型就是单次事件的概率，也就是这里的$y$只有正反（$0\ or\ 1$）两种选择，如果是正（$y = 1$）<br>$$<br>P(y = 1|\theta) = \pi p^1+(1-\pi)q^1<br>$$<br>反之亦然。这里的$y$就是观测变量，而随机变量$z$是隐变量，表示未能观测到的$A$的抛掷结果。 $\theta = (\pi,p,q)$ 是模型参数。<br>将观测数据表示为 $Y = (Y_1,Y_2,…,Y_n)^T$ ，未观测数据表示为 $Z = (Z_1,Z_2,…,Z_n)^T$，则观测数据的似然函数为：</p>
+<p>$$<br>like(\theta|Y) = P(Y|\theta) = \sum_z{P(Z|\theta)P(Y|Z,\theta)}<br>$$</p>
+<p>（是不是→_→的推导看起来怪怪的？）</p>
+<p>$$<br>like(\theta|Y) = P(Y|\theta) = \sum_z{P(Y|Z,\theta)P(Z|\theta)}<br>$$</p>
+<p>（这样看是不是好一点？思维定式。）<br>即</p>
+<p>$$<br>like(\theta|Y) = P(Y|\theta) = \prod\limits_{j=1}^{n}[\pi p^{y_j}(1-p)^{1-y_j}+(1-\pi)q^{y_j}(1-q)^{1-y_j}]<br>$$</p>
+<p>考虑求模型参数 $\theta = (\pi,p,q)$ 的极大似然估计，即</p>
+<p>\begin{equation}\begin{split}<br>\hat{\theta} = arg\mathop{max}\limits_{\theta}logP(Y|\theta)<br>\end{split}\end{equation}</p>
+<p>这个问题没有解析解，只能通过迭代的方法求解。下面给出针对以上问题的EM算法。<br>EM算法首先选取参数的初值，记作 $\theta^{(0)} = (\pi^{(0)},p^{(0)},q^{(0)})$ ，然后通过下面的步骤迭代计算参数的估计值，直至收敛为止。第 $i$ 次迭代参数的估计值为 $\theta^{(i)} = (\pi^{(i)},p^{(i)},q^{(i)})$ 。EM算法的第 $i+1$ 次迭代如下。<br><strong>E步</strong>：计算在模型参数 $\pi^{(i)},p^{(i)},q^{(i)}$ 下观测数据 $y_j$ 来自抛掷硬币 $B$ 的概率</p>
+<p>$$<br>\mu^{i+1} = \frac{\pi^{(i)}(p^{(i)})^{y_j}(1-p^{(i)})^{1-y_j}}{\pi^{(i)}(p^{(i)})^{y_j}(1-p^{(i)})^{1-y_j}+(1-\pi^{(i)})(q^{(i)})^{y_j}(1-q^{(i)})^{1-y_j}}<br>$$</p>
+<p><font color="9900ff">我的声音</font>：这里的 $y_j$ 中 $j$ 代表什么？这里不管多少次迭代，抛掷的总次数都是 $n$ 次，也就是说第几次抛掷 $j$ 和第几次迭代 $i$ 是相互独立的。这里不要对 $1-y_j$ 和 $y_j$过于深究，这里的$y_j$是非0即1的。</p>
+<p><strong>M步</strong>：计算模型参数的新估计值</p>
+<p>$$<br>\pi^{(i+1)}=\frac{1}{n}\sum_{j=1}^{n}\mu_j^{(i+1)}<br>$$</p>
+<p>$$<br>p^{(i+1)}=\frac{\sum_{j=1}^{n}\mu_j^{(i+1)}y_j}{\sum_{j=1}^{n}\mu_j^{(i+1)}}<br>$$</p>
+<p>$$<br>q^{(i+1)}=\frac{\sum_{j=1}^{n}(1-\mu_j^{(i+1)}y_j)}{\sum_{j=1}^{n}(1-\mu_j^{(i+1)})}<br>$$</p>
+<p>进行数字计算。假设模型参数初值为</p>
+<p>$$<br>\pi^{(0)} = 0.5,\ p^{(0)} = 0.5,\ q^{(0)} = 0.5<br>$$</p>
+<p>计算 $\mu$ 然后利用M步的模型估计出新的参数，不断迭代直至收敛，最后得到参数 $\theta$ 的极大似然估计：</p>
+<p>$$<br>\hat{\pi}^{(0)} = 0.5,\ \hat{p}^{(0)} = 0.6,\ \hat{q}^{(0)} = 0.6<br>$$</p>
+<p><font color="9900ff">我的声音</font>：这个三硬币模型，我理解的还不是很深，因为EM算法第一步是要求期望的，但是这个例子中E步没有求期望？</p>
+<h3 id="EM算法"><a href="#EM算法" class="headerlink" title="EM算法"></a>EM算法</h3><p>一个含隐变量的概率模型，目标是极大化观测数据，$Y$关于 $\theta$ 的对数似然函数：</p>
+<p>$$<br>L(\theta) = logP(Y|\theta) = log\sum_zP(Y,Z|\theta)\<br>= log\Big(\sum_zP(Y|Z,\theta)P(Z|\theta)\Big)<br>$$</p>
+<p>目标就是估计 $\theta$ 极大化$L(\theta)$</p>
+<p>$$<br>L(\theta) - L(\theta^{(i)}) = log\Big(\sum_zP(Y|Z,\theta)P(Z|\theta)\Big) - logP(Y|\theta^{(i)})<br>$$</p>
+<p>利用Jensen不等式</p>
+<p>$$<br>log\sum_j\lambda_jy_j \ge \sum_j\lambda_jlogy_j \ 其中 \lambda_j \ge 0 , \sum_j\lambda = 1<br>$$</p>
+<p>则：</p>
+<p>\begin{equation}\begin{split}\small<br>L(\theta) - L(\theta^{(i)}) &amp;=&amp; log\Big(\sum_zP(Y|Z,\theta^{(i)})\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})}\Big) - logP(Y|\theta^{(i)}) \\<br>&amp;\ge&amp; \sum_zP(Z|Y,\theta^{(i)})log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})} - logP(Y|\theta^{(i)}) \\<br>&amp;=&amp; \sum_zP(Z|Y,\theta^{(i)})log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})} - \sum_zP(Z|Y,\theta^{(i)})logP(Y|\theta^{(i)}) \\<br>&amp;=&amp; \sum_zP(Z|Y,\theta^{(i)})\bigg(log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})} - logP(Y|\theta^{(i)}) \bigg) \\<br>&amp;=&amp; \sum_zP(Z|Y,\theta^{(i)})log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})P(Y|\theta^{(i)})}<br>\small\end{split}\end{equation}</p>
+<p>令</p>
+<p>$$<br>B(\theta,\theta^{(i)}) \hat= L(\theta^{(i)}) +  \sum_zP(Z|Y,\theta^{(i)})log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})P(Y|\theta^{(i)})}<br>$$</p>
+<p>则</p>
+<p>$$<br>L(\theta) \ge B(\theta,\theta^{(i)})<br>$$</p>
+<p>即 $B(\theta,\theta^{(i)})$ 是 $L(\theta)$ 的一个下界，且$B(\theta^{(i)},\theta^{(i)}) = L(\theta^{(i)})$，因此将$B(\theta,\theta^{(i)})$ 极大化，就近似等于对$L(\theta)$极大化。即</p>
+<p>$$<br>\theta^{(i+1)} = arg\mathop{max}\limits_{\theta}B(\theta, \theta^{(i)})<br>$$</p>
+<p>约去对 $\theta$ 而言是常数的项：</p>
+<p>$$<br>\theta^{(i+1)} = arg\mathop{max}\limits_{\theta}\bigg(L(\theta^{(i)}) +  \sum_zP(Z|Y,\theta^{(i)})log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})P(Y|\theta^{(i)})}\bigg)<br>$$</p>
+<p>$$<br>= arg\mathop{max}\limits_{\theta}\bigg(logP(Y|\theta) +  \sum_zP(Z|Y,\theta^{(i)})log\frac{P(Y|Z,\theta)P(Z|\theta)}{P(Y|Z,\theta^{(i)})P(Y|\theta^{(i)})}\bigg)<br>$$</p>
+<p>$$<br>= arg\mathop{max}\limits_{\theta}\bigg(\sum_zP(Z|Y,\theta^{(i)})\Big(logP(Y|Z,\theta)P(Z|\theta)-logP(Y|Z,\theta^{(i)})P(Y|\theta^{(i)})\Big)\bigg)<br>$$</p>
+<p>$$<br>= arg\mathop{max}\limits_{\theta}\bigg(\sum_zP(Z|Y,\theta^{(i)})logP(Y|Z,\theta)P(Z|\theta)\bigg)<br>$$</p>
+<p>$$<br>= arg\mathop{max}\limits_{\theta}Q(\theta,\theta^{(i)})<br>$$</p>
+<p>所以EM算法的一次迭代就是对 $Q$ 函数的极大化。<br>总结一下，EM算法就是不断求解下界的极大化去逼近真实似然函数的极大值。</p>
+<p><img src="/images/171208em.png" alt="EM">  </p>
+<p>如图就是对下界逼近的一个直观解释，下界最优的方法，不一定会得到$L(\theta)$ 最优的结果。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/统计学习/" rel="tag"># 统计学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/05/每天学习健身/" rel="next" title="每天学习健身">
+                <i class="fa fa-chevron-left"></i> 每天学习健身
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="Moses" />
+            
+              <p class="site-author-name" itemprop="name">Moses</p>
+              <p class="site-description motion-element" itemprop="description">不忘记自己的小小进步！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Abstract"><span class="nav-number">1.</span> <span class="nav-text"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EM算法的引入"><span class="nav-number">2.</span> <span class="nav-text"><a href="#EM&#x7B97;&#x6CD5;&#x7684;&#x5F15;&#x5165;" class="headerlink" title="EM&#x7B97;&#x6CD5;&#x7684;&#x5F15;&#x5165;"></a>EM&#x7B97;&#x6CD5;&#x7684;&#x5F15;&#x5165;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EM算法的例子"><span class="nav-number">3.</span> <span class="nav-text"><a href="#EM&#x7B97;&#x6CD5;&#x7684;&#x4F8B;&#x5B50;" class="headerlink" title="EM&#x7B97;&#x6CD5;&#x7684;&#x4F8B;&#x5B50;"></a>EM&#x7B97;&#x6CD5;&#x7684;&#x4F8B;&#x5B50;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EM算法"><span class="nav-number">4.</span> <span class="nav-text"><a href="#EM&#x7B97;&#x6CD5;" class="headerlink" title="EM&#x7B97;&#x6CD5;"></a>EM&#x7B97;&#x6CD5;</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Moses</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

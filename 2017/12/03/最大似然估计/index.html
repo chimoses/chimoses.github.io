@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="统计学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="abstract：似然函数、最大似然估计、求根公式、大数定律 似然函数关于似然函数，这篇博客–《似然函数》解释的很好。 有两句话总结的很好：  概率用于在已知一些参数的情况下，预测接下来观测所得到的结果。似然性则是用于在已知某些观测所得到的结果时，对有关事物的性质的参数进行估计。  概率和似然这两个概念很接近，概率是从概率论的角度去思考问题的，比如已知抛掷一枚硬币正面朝上的概率是70%，那抛掷10">
+<meta name="keywords" content="统计学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="最大似然估计">
+<meta property="og:url" content="http://yoursite.com/2017/12/03/最大似然估计/index.html">
+<meta property="og:site_name" content="Time waits for no one">
+<meta property="og:description" content="abstract：似然函数、最大似然估计、求根公式、大数定律 似然函数关于似然函数，这篇博客–《似然函数》解释的很好。 有两句话总结的很好：  概率用于在已知一些参数的情况下，预测接下来观测所得到的结果。似然性则是用于在已知某些观测所得到的结果时，对有关事物的性质的参数进行估计。  概率和似然这两个概念很接近，概率是从概率论的角度去思考问题的，比如已知抛掷一枚硬币正面朝上的概率是70%，那抛掷10">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-04T00:40:04.383Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="最大似然估计">
+<meta name="twitter:description" content="abstract：似然函数、最大似然估计、求根公式、大数定律 似然函数关于似然函数，这篇博客–《似然函数》解释的很好。 有两句话总结的很好：  概率用于在已知一些参数的情况下，预测接下来观测所得到的结果。似然性则是用于在已知某些观测所得到的结果时，对有关事物的性质的参数进行估计。  概率和似然这两个概念很接近，概率是从概率论的角度去思考问题的，比如已知抛掷一枚硬币正面朝上的概率是70%，那抛掷10">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/03/最大似然估计/"/>
+
+
+
+
+
+  <title>最大似然估计 | Time waits for no one</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Time waits for no one</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/03/最大似然估计/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Moses">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Time waits for no one">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">最大似然估计</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-03T15:44:29+08:00">
+                2017-12-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/机器学习/" itemprop="url" rel="index">
+                    <span itemprop="name">机器学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><font color="ff6600">abstract：</font>似然函数、最大似然估计、求根公式、大数定律</p>
+<h3 id="似然函数"><a href="#似然函数" class="headerlink" title="似然函数"></a>似然函数</h3><p>关于似然函数，这篇博客–<a href="http://xiaosheng.me/2017/03/01/article37/" target="_blank" rel="noopener">《似然函数》</a>解释的很好。 有两句话总结的很好：</p>
+<blockquote>
+<p>概率用于在已知一些参数的情况下，预测接下来观测所得到的结果。<br>似然性则是用于在已知某些观测所得到的结果时，对有关事物的性质的参数进行估计。</p>
+</blockquote>
+<p>概率和似然这两个概念很接近，概率是从概率论的角度去思考问题的，比如已知抛掷一枚硬币正面朝上的概率是70%，那抛掷10次硬币都朝上的概率是什么？也就是说！！ <strong>已知客观参数，预测事件的结果。</strong><br>而似然正好相反，是从统计学的角度去思考问题的，即已知事结果，<strong>估计是什么样的参数造成了这样的结果</strong>。</p>
+<p>给定随机变量 $X$ 取值为 $x$ 时，关于参数 $\theta$ 的似然函数 $like(\theta| X = x)$（在数值上）等于给定参数 $\theta$ 后变量 $X$取值的 $x$ 的概率：<br>$$<br>like(\theta\ | X = x) = P(X=x|\ \theta\ )<br>$$<br>再说一种理解：<br>求概率 –&gt; 给定参数值时，观测结果出现的概率<br>求似然 –&gt; 给定观测结果，参数取不同值的可能性</p>
+<p><font color="9900ff">我的声音</font>：这上面的解释能不能加深一些对似然的理解！理解似然、统计，这种概念很重要，要不然就一直懵懵的。</p>
+<h4 id="求根公式"><a href="#求根公式" class="headerlink" title="求根公式"></a>求根公式</h4><p>对于一元二次方程 $ax^2+bx+c = 0 \ (a\not = 0)$<br>求根公式：<br>$$<br>x = \frac{-b\;\pm \sqrt{b\;^2 - 4ac}}{2a}<br>$$<br>在<br>$$<br>\frac{-b}{2a}<br>$$<br>处取得极值。</p>
+<p><font color="9900ff">我的声音</font>：求根公式这种两年前特别熟的都能忘差不多了。</p>
+<h3 id="似然函数的例子"><a href="#似然函数的例子" class="headerlink" title="似然函数的例子"></a>似然函数的例子</h3><p>考虑抛一枚硬币的实验，正常来说，如果抛一枚硬币正面朝上的概率为$P_H = 0.5$,则抛两次正面朝上的概率为0.25。用概率来表示就是：</p>
+<p>$$<br>P(HH|p_H = 0.5) = 0.5^2 = 0.25<br>$$<br>其中H表示正面朝上。<br>统计，我们关心的已知一系列抛掷的结果，预测硬币抛掷一次正面朝上的可能性。<br>比如我们如果观测了硬币抛掷两次的结果都为正面。即求抛掷两次硬币都正面朝上的似然为：<br>$$<br>like(p_H|HH) = P(HH|p_H = \theta) = \theta^2<br>$$<br>即求使得似然最大时的$\ \theta\ $，也就是求$f(\theta) = \theta^2 \ (0\leq \theta \leq 1)\ $ 函数值最大时的参数$\ \theta\ $ 的取值。这里不管是借助求根公式还是直接心算，都可以得到$\ \theta\ $取1时似然最大。也就是两次抛掷硬币都为正估计出的==硬币抛掷一次为正的概率为1==</p>
+<p><font color="9900ff">我的声音</font>：上面这个例子很好理解了，如果还想再理解一下，可以试试估计如果抛掷的结果第一次为正，第二次为反的似然，最后会得出参数$\ \theta = 0.5 $。</p>
+<h3 id="最大似然估计"><a href="#最大似然估计" class="headerlink" title="最大似然估计"></a>最大似然估计</h3><p>最大似然估计是似然估计一个最初也是最自然的应用，上面的<strong>似然函数的例子</strong>其实就是利用最大似然估计去确定相应的参数能够使得统计模型最为<strong>合理</strong>。所以一言以蔽之，最大似然估计就是对似然函数$\ like(\theta)\ $求最大值。像<strong>似然函数的例子</strong>中简单的似然函数直接用求根公式就可以求得最大值处的参数值。但是有些比较复杂的就要借助函数的一阶导数为0来求极值或者最大值。实际应用中，<strong>一般会取似然函数的$\log$对数来作为求最大值的函数</strong>。因为$\log$是单调函数，所以求$\log$函数的最大值和求原函数的最大值是等价的。这个使似然函数最大的$\ \hat{\theta}\ $即为参数$\ \theta\ $的最大似然估计。</p>
+<p>我们还是以之前的抛硬币实验来说明。假设我们有一枚不均匀的硬币，我们希望知道它正面朝上的概率$\ \theta\ $。于是，我们开始不停地抛硬币，并记录下每次抛出的结果。假设我们共抛了$\ n\ $次，其中$\ k\ $次正面朝上。那么以一次抛掷正面朝上为概率$\ \theta\ $的似然函数为：</p>
+<p>$$<br>like(\theta) = P(H = k, T = n-k|\theta) = \binom{n}{k}\theta^k(1-\theta)^{n-k}<br>$$<br>注：这里$H=k \ ;\  T=n-k\ $表示正面朝上出现$\ k\ $次，正面朝下出现$\ n-k\ $次；</p>
+<p>首先我们对似然函数$\ like(\theta)\ $求对数，即将$\ \ln{like(\theta)}\ $作为求最大值的函数。接下来对似然函数的对数求微分，即将将$\ \ln{like(\theta)}\ $对$\theta$取微分，并使其为0：</p>
+<p>$$<br>\frac{\mathrm{d}}{\mathrm{d}\theta}\bigg(\ln{like(\theta)}\bigg) = \frac{\mathrm{d}}{\mathrm{d}\theta}\bigg(\ln\binom{n}{k} + k\ln\theta + (n-k)\ln{(1-\theta)} \bigg) = 0 \\<br>\because \ln\binom{n}{k}\ has\ no\ \theta \ \therefore \frac{\mathrm{d}}{\mathrm{d}\theta}\bigg(\ln\binom{n}{k}\bigg) = 0 \\<br>\frac{\mathrm{d}}{\mathrm{d}\theta}\bigg(\ln{like(\theta)}\bigg) = \frac{k}{\theta}-\frac{n-k}{1-\theta} = 0\\<br>k(1-\theta)-(n-k)\theta = 0\\<br>\theta = \frac{k}{n}<br>$$<br>即$\ \theta\ $的最大似然估计值$\ \hat{\theta} = k/n\ $。这其实正好就是n次实验中正面朝上出现的概率，这解释了一个很吊的事情：平常我们可以用抽样的方式，统计抽样概率，抽样概率的结果可以作为整体数据的近似。 也就是抽样的方式来对整理进行估计。也就解释了，为什么“把一枚硬币抛掷无限次，最后正面朝上的次数除以总次数就是单枚硬币抛掷一次正面朝上的概率。”（不知道这样说清不清楚。）</p>
+<p>上面的规律在数学上称为<strong>大数定律</strong>(Law of Large Number)，即在试验不变的条件下，只要试验的重复次数足够多，随机事件的频率就近似于它的概率，偶然中包含着某种必然。严格的定义为：假设$\mu$是$n$次独立事件中事件$A$发生的次数，且事件$A$在每次试验中发生的概率为$P$,对任意正数$\varepsilon$有</p>
+<p>$$<br>\lim\limits_{n\to \infty}P(|\frac{\mu_n}{n} - p| &lt; \varepsilon) = 1<br>$$</p>
+<p>该定律通常也被称为伯努利大数定律，是切比雪夫大数定律的特例，其含义是，当 $n$足够大时，事件$A$出现的频率将几乎接近于其发生的概率，即频率的稳定性。</p>
+<h3 id="references"><a href="#references" class="headerlink" title="references"></a>references</h3><p>[1] <a href="http://xiaosheng.me/2017/03/01/article37/" target="_blank" rel="noopener">似然函数</a>–小昇的博客</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/统计学习/" rel="tag"># 统计学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/04/条件随机场/" rel="prev" title="条件随机场">
+                条件随机场 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="Moses" />
+            
+              <p class="site-author-name" itemprop="name">Moses</p>
+              <p class="site-description motion-element" itemprop="description">不忘记自己的小小进步！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#似然函数"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x4F3C;&#x7136;&#x51FD;&#x6570;" class="headerlink" title="&#x4F3C;&#x7136;&#x51FD;&#x6570;"></a>&#x4F3C;&#x7136;&#x51FD;&#x6570;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#求根公式"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#&#x6C42;&#x6839;&#x516C;&#x5F0F;" class="headerlink" title="&#x6C42;&#x6839;&#x516C;&#x5F0F;"></a>&#x6C42;&#x6839;&#x516C;&#x5F0F;</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#似然函数的例子"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x4F3C;&#x7136;&#x51FD;&#x6570;&#x7684;&#x4F8B;&#x5B50;" class="headerlink" title="&#x4F3C;&#x7136;&#x51FD;&#x6570;&#x7684;&#x4F8B;&#x5B50;"></a>&#x4F3C;&#x7136;&#x51FD;&#x6570;&#x7684;&#x4F8B;&#x5B50;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最大似然估计"><span class="nav-number">3.</span> <span class="nav-text"><a href="#&#x6700;&#x5927;&#x4F3C;&#x7136;&#x4F30;&#x8BA1;" class="headerlink" title="&#x6700;&#x5927;&#x4F3C;&#x7136;&#x4F30;&#x8BA1;"></a>&#x6700;&#x5927;&#x4F3C;&#x7136;&#x4F30;&#x8BA1;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#references"><span class="nav-number">4.</span> <span class="nav-text"><a href="#references" class="headerlink" title="references"></a>references</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Moses</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
